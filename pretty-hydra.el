@@ -101,7 +101,7 @@
     (s-concat " " (propertize title 'face 'pretty-hydra-title-face) "\n" docstring)))
 
 ;;;###autoload
-(defmacro pretty-hydra-define (name body heads-plist)
+(defmacro pretty-hydra-define (name body heads-plist &optional extra-heads extra-docs)
   (declare (indent defun) (doc-string 3))
   (let* ((separator (or (plist-get body :separator) "─"))
          (formatter (or (plist-get body :formatter)
@@ -111,8 +111,9 @@
          (docstring (->> heads-plist
                          (pretty-hydra--gen-body-docstring separator)
                          (funcall formatter)
-                         (s-prepend "\n"))) ;; This is required, otherwise the docstring won't show up correctly
-         (heads (pretty-hydra--get-heads heads-plist)))
+                         (s-prepend "\n")
+                         (s-append extra-docs))) ;; This is required, otherwise the docstring won't show up correctly
+         (heads (append (pretty-hydra--get-heads heads-plist) extra-heads)))
     `(defhydra ,name ,body
        ,docstring
        ,@heads)))
